@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Botanica Healthcare — Product Inquiry Chatbot</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0B1E3D;
+    --navy-mid: #132847;
+    --navy-light: #1A3560;
+    --gold: #C8A84B;
+    --gold-light: #E8C96A;
+    --cream: #F5F0E8;
+    --cream-mid: #EDE5D4;
+    --green: #2A6B4F;
+    --green-light: #3D9970;
+    --text-dark: #0B1E3D;
+    --text-mid: #4A5568;
+    --text-light: #8A96A8;
+    --white: #FFFFFF;
+    --shadow: 0 4px 24px rgba(11,30,61,0.12);
+    --shadow-lg: 0 12px 48px rgba(11,30,61,0.18);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--gold);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .logo-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--white);
+    letter-spacing: 0.5px;
+  }
+
+  .logo-text p {
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .header-badge {
+    background: rgba(200,168,75,0.15);
+    border: 1px solid rgba(200,168,75,0.4);
+    color: var(--gold-light);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main-container {
+    display: flex;
+    flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    gap: 0;
+    padding: 0;
+  }
+
+  /* ── CHAT WINDOW ── */
+  .chat-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 84px);
+    background: var(--white);
+    border-right: 1px solid var(--cream-mid);
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    scroll-behavior: smooth;
+  }
+
+  /* ── SIDE PANEL ── */
+  .side-panel {
+    width: 320px;
+    background: var(--cream);
+    border-left: 1px solid var(--cream-mid);
+    padding: 24px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .side-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: var(--navy);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--cream-mid);
+  }
+
+  /* ── MESSAGES ── */
+  .msg {
+    display: flex;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-bot { align-items: flex-start; }
+  .msg-user { align-items: flex-start; flex-direction: row-reverse; }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .avatar-bot {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    border: 2px solid var(--gold);
+    font-size: 18px;
+  }
+
+  .avatar-user {
+    background: var(--green);
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .bubble {
+    max-width: 72%;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    line-height: 1.6;
+    font-size: 14px;
+  }
+
+  .bubble-bot {
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 4px var(--radius) var(--radius) var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .bubble-bot strong {
+    color: var(--gold-light);
+  }
+
+  .bubble-user {
+    background: var(--green);
+    color: var(--white);
+    border-radius: var(--radius) 4px var(--radius) var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  /* ── OPTION BUTTONS ── */
+  .options-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-left: 48px;
+    animation: slideIn 0.35s ease 0.1s both;
+  }
+
+  .options-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .opt-btn {
+    background: var(--white);
+    border: 1.5px solid var(--navy-light);
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+
+  .opt-btn:hover {
+    background: var(--navy);
+    color: var(--white);
+    border-color: var(--navy);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(11,30,61,0.2);
+  }
+
+  .opt-btn:active {
+    transform: translateY(0);
+  }
+
+  .opt-btn.gold-btn {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-color: var(--gold);
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  .opt-btn.gold-btn:hover {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: var(--navy);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(200,168,75,0.3);
+  }
+
+  .opt-btn.outline-btn {
+    background: transparent;
+    border-color: var(--cream-mid);
+    color: var(--text-mid);
+  }
+
+  .opt-btn.outline-btn:hover {
+    border-color: var(--navy);
+    color: var(--navy);
+    background: var(--white);
+  }
+
+  /* ── TEXT INPUT ── */
+  .text-input-wrap {
+    padding-left: 48px;
+    animation: slideIn 0.35s ease 0.1s both;
+  }
+
+  .text-field-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .text-field {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1.5px solid var(--cream-mid);
+    border-radius: 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    background: var(--white);
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .text-field:focus {
+    border-color: var(--navy-light);
+    box-shadow: 0 0 0 3px rgba(26,53,96,0.08);
+  }
+
+  .text-field::placeholder { color: var(--text-light); }
+
+  .send-btn {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: background 0.2s, transform 0.1s;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover { background: var(--navy-light); transform: scale(1.05); }
+
+  /* ── INFO CARD ── */
+  .info-card {
+    background: var(--navy);
+    border-radius: var(--radius);
+    padding: 16px;
+    color: var(--white);
+  }
+
+  .info-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    color: var(--gold-light);
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .info-row:last-child { border-bottom: none; }
+  .info-row-label { color: rgba(255,255,255,0.6); }
+  .info-row-value { color: var(--white); font-weight: 500; }
+
+  /* ── PRODUCT PILL ── */
+  .product-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cream);
+    border: 1px solid var(--cream-mid);
+    color: var(--navy);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .product-pill:hover {
+    background: var(--navy);
+    color: var(--white);
+    border-color: var(--navy);
+  }
+
+  /* ── PILLAR GRID ── */
+  .pillar-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .pillar-card {
+    background: var(--white);
+    border: 1.5px solid var(--cream-mid);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .pillar-card:hover {
+    border-color: var(--navy-light);
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+  }
+
+  .pillar-card .pillar-icon { font-size: 22px; margin-bottom: 5px; }
+  .pillar-card .pillar-name { font-size: 12px; font-weight: 600; color: var(--navy); line-height: 1.3; }
+  .pillar-card .pillar-count { font-size: 10px; color: var(--text-light); margin-top: 2px; }
+
+  /* ── PROGRESS BREADCRUMB ── */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 24px;
+    background: var(--cream);
+    border-bottom: 1px solid var(--cream-mid);
+    flex-wrap: wrap;
+  }
+
+  .crumb {
+    font-size: 12px;
+    color: var(--text-light);
+    font-weight: 400;
+  }
+
+  .crumb.active {
+    color: var(--navy);
+    font-weight: 600;
+    background: var(--white);
+    padding: 3px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--cream-mid);
+  }
+
+  .crumb-sep { color: var(--text-light); font-size: 10px; }
+
+  /* ── TYPING INDICATOR ── */
+  .typing {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 0;
+  }
+
+  .typing-dots {
+    display: flex;
+    gap: 5px;
+    background: var(--navy);
+    padding: 12px 18px;
+    border-radius: 4px var(--radius) var(--radius) var(--radius);
+  }
+
+  .typing-dots span {
+    width: 7px;
+    height: 7px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  /* ── THANK YOU / END ── */
+  .end-card {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    border: 1px solid var(--gold);
+    margin-left: 48px;
+    animation: slideIn 0.3s ease;
+  }
+
+  .end-card h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--gold-light);
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .end-card p {
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* ── LINK TAG ── */
+  .link-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(200,168,75,0.15);
+    border: 1px solid rgba(200,168,75,0.4);
+    color: var(--gold-light);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+
+  .link-tag:hover { background: rgba(200,168,75,0.25); }
+
+  /* ── COLLECTED DATA ── */
+  .collected-data {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--cream-mid);
+    overflow: hidden;
+  }
+
+  .collected-header {
+    background: var(--navy);
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold-light);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .collected-body {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .collected-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    align-items: baseline;
+  }
+
+  .collected-label { color: var(--text-light); }
+  .collected-value { color: var(--navy); font-weight: 600; text-align: right; max-width: 150px; }
+
+  /* ── DIVIDER ── */
+  .divider-line {
+    border: none;
+    border-top: 1px solid var(--cream-mid);
+    margin: 4px 0;
+  }
+
+  /* ── FOOTER INPUT BAR ── */
+  .input-bar {
+    padding: 16px 24px;
+    background: var(--white);
+    border-top: 1px solid var(--cream-mid);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .input-bar input {
+    flex: 1;
+    padding: 11px 18px;
+    border: 1.5px solid var(--cream-mid);
+    border-radius: 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text-dark);
+    outline: none;
+    background: var(--cream);
+    transition: all 0.2s;
+  }
+
+  .input-bar input:focus {
+    border-color: var(--navy-light);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(26,53,96,0.08);
+  }
+
+  .input-bar input::placeholder { color: var(--text-light); }
+
+  .input-bar .send-main {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .input-bar .send-main:hover {
+    background: var(--navy-light);
+    transform: scale(1.05);
+  }
+
+  .restart-btn {
+    background: transparent;
+    border: 1.5px solid var(--cream-mid);
+    color: var(--text-mid);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .restart-btn:hover { border-color: var(--navy); color: var(--navy); }
+
+  /* ── SCROLL STYLE ── */
+  .chat-messages::-webkit-scrollbar { width: 5px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--cream-mid); border-radius: 3px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .side-panel { display: none; }
+    .main-container { max-width: 100%; }
+    header { padding: 16px 20px; }
+    .bubble { max-width: 85%; }
+  }
+
+  .fade-in { animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .highlight-green { color: var(--green-light); font-weight: 600; }
+  .highlight-gold { color: var(--gold-light); font-weight: 600; }
+
+  /* ── LOGO SHIMMER ── */
+  @keyframes shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .logo-icon { animation: shimmer 3s ease infinite; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-area">
+    <div class="logo-icon">🌿</div>
+    <div class="logo-text">
+      <h1>Botanica Healthcare</h1>
+      <p>Product Inquiry Assistant</p>
+    </div>
+  </div>
+  <div class="header-badge">🟢 Live</div>
+</header>
+
+<!-- MAIN -->
+<div class="main-container">
+
+  <!-- CHAT PANE -->
+  <div class="chat-pane">
+
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb" id="breadcrumb">
+      <span class="crumb active">Welcome</span>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <!-- INPUT BAR -->
+    <div class="input-bar">
+      <button class="restart-btn" onclick="restartChat()">↺ Restart</button>
+      <input type="text" id="mainInput" placeholder="Type a message or use the options above…" onkeydown="handleKeydown(event)">
+      <button class="send-main" onclick="handleFreeInput()">➤</button>
+    </div>
+  </div>
+
+  <!-- SIDE PANEL -->
+  <div class="side-panel" id="sidePanel">
+    <div>
+      <div class="side-section-title">📋 Your Inquiry Summary</div>
+      <div class="collected-data">
+        <div class="collected-header">Collected Information</div>
+        <div class="collected-body" id="collectedBody">
+          <div style="font-size:12px;color:var(--text-light);text-align:center;padding:8px 0;">
+            Your selections will appear here as you proceed.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="side-section-title">🌿 Product Categories</div>
+      <div class="pillar-grid" id="pillarGrid">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+
+    <div>
+      <div class="side-section-title">📞 Contact</div>
+      <div class="info-card">
+        <div class="info-card-title">Business Development Team</div>
+        <div class="info-row">
+          <span class="info-row-label">Response Time</span>
+          <span class="info-row-value">Within 24h</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Samples</span>
+          <span class="info-row-value">Free Globally</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Processing Lead Time</span>
+          <span class="info-row-value">2–4 Weeks</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">International Shipping</span>
+          <span class="info-row-value">✅ Available</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row-label">Min. Packaging</span>
+          <span class="info-row-value">25 kg HDPE drums</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────
+const PILLARS = [
+  { icon: '💪', name: 'Immunity',          products: ['TinoImmune','Turma Longa','BetaVive'] },
+  { icon: '🦠', name: 'Gut Health',         products: ['Guarsol','Berbix','Salnic'] },
+  { icon: '👁️', name: 'Vitality',           products: ['LuteNic','BioPepper 95','LipsoBio','Turma Longa'] },
+  { icon: '🦴', name: 'Bone & Joint',        products: ['AbsoCurcumin','MucoJoint','MucoJoint-S','Sali-Bio','Aquamin 50'] },
+  { icon: '😌', name: 'Mood Support',        products: ['Kavasoul','Pistamel'] },
+  { icon: '🧠', name: 'Cognitive Health',    products: ['AshwaMind','Bacopure'] },
+  { icon: '❤️', name: 'Heart & Liver',       products: ['Biolivogen','Co-Pure'] },
+  { icon: '🌙', name: 'Sleep Support',       products: ['Melostacio Gold','Melostacio'] },
+  { icon: '🌸', name: "Women's Health",      products: ['MenoSphora','Bio-She','Forlite','Aspariva'] },
+  { icon: '🏋️', name: 'Sports Nutrition',   products: ['Gymsol','BioPepper 95','AbsoPerine'] },
+  { icon: '⚖️', name: 'Weight Management',   products: ['8Loss','CornFit','Coffee Lean','Garci-Mate','Salacia'] },
+  { icon: '✨', name: 'Beauty',              products: ['Peptiglow'] },
+];
+
+const ASHWAGANDHA_DATA = {
+  rootGrades: ['1.5%','2.5%','5% (HPLC)','5% (Gravimetry)'],
+  leafGrade: '1.5–8%',
+  rootLeafGrade: 'Withanolides NLT 5% w/w by HPLC',
+  withanolideOptions: ['2.5%','5–10%','10%'],
+  moqOptions: ['50 Kg','100 Kg','250+ Kg'],
+  links: {
+    clinical: 'https://www.botanichealthcare.net/ashwamind/',
+    brand: 'https://www.botanichealthcare.net/ashwamind/',
+    certifications: 'https://www.botanichealthcare.net/certifications/',
+  }
+};
+
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+let state = {
+  step: 'welcome',
+  collected: {},
+  currentProduct: null,
+  breadcrumbs: ['Welcome'],
+};
+
+// ─────────────────────────────────────────
+// UTILITIES
+// ─────────────────────────────────────────
+const chat = document.getElementById('chatMessages');
+const collected = {};
+
+function scrollBot() {
+  setTimeout(() => {
+    chat.scrollTop = chat.scrollHeight;
+  }, 50);
+}
+
+function updateBreadcrumb() {
+  const bc = document.getElementById('breadcrumb');
+  bc.innerHTML = state.breadcrumbs.map((c, i) =>
+    i === state.breadcrumbs.length - 1
+      ? `<span class="crumb active">${c}</span>`
+      : `<span class="crumb">${c}</span><span class="crumb-sep">›</span>`
+  ).join('');
+}
+
+function updateSidePanel() {
+  const body = document.getElementById('collectedBody');
+  const entries = Object.entries(state.collected);
+  if (entries.length === 0) {
+    body.innerHTML = `<div style="font-size:12px;color:var(--text-light);text-align:center;padding:8px 0;">Your selections will appear here as you proceed.</div>`;
+    return;
+  }
+  body.innerHTML = entries.map(([k, v]) => `
+    <div class="collected-row">
+      <span class="collected-label">${k}</span>
+      <span class="collected-value">${v}</span>
+    </div>
+  `).join('<hr class="divider-line">');
+}
+
+function botMsg(html, delay = 0) {
+  return new Promise(resolve => {
+    // Show typing
+    const typingEl = document.createElement('div');
+    typingEl.className = 'msg msg-bot typing fade-in';
+    typingEl.innerHTML = `
+      <div class="avatar avatar-bot">🌿</div>
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    `;
+    chat.appendChild(typingEl);
+    scrollBot();
+
+    setTimeout(() => {
+      typingEl.remove();
+      const msgEl = document.createElement('div');
+      msgEl.className = 'msg msg-bot fade-in';
+      msgEl.innerHTML = `
+        <div class="avatar avatar-bot">🌿</div>
+        <div class="bubble bubble-bot">${html}</div>
+      `;
+      chat.appendChild(msgEl);
+      scrollBot();
+      resolve();
+    }, delay + 600);
+  });
+}
+
+function userMsg(text) {
+  const msgEl = document.createElement('div');
+  msgEl.className = 'msg msg-user fade-in';
+  msgEl.innerHTML = `
+    <div class="avatar avatar-user">You</div>
+    <div class="bubble bubble-user">${text}</div>
+  `;
+  chat.appendChild(msgEl);
+  scrollBot();
+}
+
+function addOptions(buttons, isRow = false) {
+  const wrap = document.createElement('div');
+  wrap.className = isRow ? 'options-wrap' : 'options-wrap';
+  wrap.id = 'current-options';
+
+  const row = document.createElement('div');
+  row.className = 'options-row';
+
+  buttons.forEach(btn => {
+    const b = document.createElement('button');
+    b.className = `opt-btn ${btn.style || ''}`;
+    b.innerHTML = btn.label;
+    b.onclick = () => {
+      document.querySelectorAll('#current-options').forEach(el => {
+        el.querySelectorAll('button').forEach(b2 => b2.disabled = true);
+      });
+      btn.action();
+    };
+    row.appendChild(b);
+  });
+
+  wrap.appendChild(row);
+  chat.appendChild(wrap);
+  scrollBot();
+}
+
+function addTextInput(placeholder, callback) {
+  const wrap = document.createElement('div');
+  wrap.className = 'text-input-wrap fade-in';
+  wrap.id = 'current-options';
+  wrap.innerHTML = `
+    <div class="text-field-row">
+      <input class="text-field" type="text" placeholder="${placeholder}" id="inline-input">
+      <button class="send-btn" id="inline-send">➤</button>
+    </div>
+  `;
+  chat.appendChild(wrap);
+  scrollBot();
+
+  const inp = wrap.querySelector('#inline-input');
+  const btn = wrap.querySelector('#inline-send');
+
+  const submit = () => {
+    const val = inp.value.trim();
+    if (!val) return;
+    inp.disabled = true;
+    btn.disabled = true;
+    callback(val);
+  };
+
+  btn.onclick = submit;
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  setTimeout(() => inp.focus(), 100);
+}
+
+function addEndCard(title, msg) {
+  const card = document.createElement('div');
+  card.className = 'end-card fade-in';
+  card.innerHTML = `<h3>${title}</h3><p>${msg}</p>`;
+  chat.appendChild(card);
+  scrollBot();
+}
+
+// ─────────────────────────────────────────
+// FLOWS
+// ─────────────────────────────────────────
+
+async function startWelcome() {
+  state.step = 'category';
+  state.breadcrumbs = ['Welcome', 'Select Category'];
+  updateBreadcrumb();
+
+  await botMsg(`Welcome to <strong>Botanica Healthcare</strong>! 🌿<br><br>I'm your dedicated product inquiry assistant. I can help you explore our <strong>12 health pillars</strong>, find the right ingredients, discuss specifications, and connect you with our Business Development team.`);
+  await botMsg(`Which health category are you interested in today?`, 300);
+  showCategoryGrid();
+}
+
+function showCategoryGrid() {
+  const wrap = document.createElement('div');
+  wrap.className = 'options-wrap fade-in';
+  wrap.id = 'current-options';
+
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;';
+
+  PILLARS.forEach(p => {
+    const card = document.createElement('button');
+    card.className = 'opt-btn';
+    card.style.cssText = 'flex-direction:column;padding:12px 10px;border-radius:12px;gap:4px;align-items:center;text-align:center;';
+    card.innerHTML = `<span style="font-size:20px">${p.icon}</span><span style="font-size:12px;font-weight:600">${p.name}</span><span style="font-size:10px;color:var(--text-light)">${p.products.length} products</span>`;
+    card.onclick = () => {
+      wrap.querySelectorAll('button').forEach(b => b.disabled = true);
+      handleCategorySelect(p);
+    };
+    grid.appendChild(card);
+  });
+
+  wrap.appendChild(grid);
+  chat.appendChild(wrap);
+  scrollBot();
+}
+
+async function handleCategorySelect(pillar) {
+  userMsg(`${pillar.icon} ${pillar.name}`);
+  state.collected['Category'] = pillar.name;
+  state.breadcrumbs = ['Welcome', pillar.name];
+  updateBreadcrumb();
+  updateSidePanel();
+
+  await botMsg(`Great choice! Here are our <strong>${pillar.name}</strong> products. Which one are you interested in?`, 200);
+  showProductSelection(pillar);
+}
+
+function showProductSelection(pillar) {
+  const btns = pillar.products.map(p => ({
+    label: p,
+    style: p === 'AshwaMind' ? 'gold-btn' : '',
+    action: () => handleProductSelect(p, pillar)
+  }));
+  btns.push({ label: '⬅ Back to categories', style: 'outline-btn', action: () => {
+    userMsg('Back to categories');
+    startWelcome();
+  }});
+  addOptions(btns);
+}
+
+async function handleProductSelect(product, pillar) {
+  userMsg(product);
+  state.collected['Product'] = product;
+  state.currentProduct = product;
+  state.breadcrumbs = ['Welcome', pillar.name, product];
+  updateBreadcrumb();
+  updateSidePanel();
+
+  // Check if Ashwagandha-related product
+  const isAshwa = product === 'AshwaMind' || product.toLowerCase().includes('ashwa');
+  if (isAshwa) {
+    await botMsg(`Excellent choice! <strong>AshwaMind</strong> is our flagship Ashwagandha extract — a premium adaptogen clinically studied for cognitive health, stress relief, and vitality. 🌿<br><br>Let me guide you through our Ashwagandha product specifications.`, 200);
+    await startAshwagandhaFlow();
+  } else {
+    await botMsg(`You've selected <strong>${product}</strong> from our ${pillar.name} range.<br><br>Our Business Development team will be in touch with complete specifications, pricing, and sample availability for <strong>${product}</strong>.`, 300);
+    await askAnythingElse();
+  }
+}
+
+// ─────────────────────────────────────────
+// ASHWAGANDHA FLOW
+// ─────────────────────────────────────────
+
+async function startAshwagandhaFlow() {
+  state.breadcrumbs = ['Welcome', 'Cognitive Health', 'AshwaMind', 'Extract Type'];
+  updateBreadcrumb();
+
+  await botMsg(`What type of Ashwagandha extract are you looking for?`, 200);
+  addOptions([
+    { label: '🌱 Root Extract',            action: () => handleExtractType('Root Extract') },
+    { label: '🍃 Leaf Extract',            action: () => handleExtractType('Leaf Extract') },
+    { label: '🌿 Both Root & Leaf',        action: () => handleExtractType('Both Root & Leaf') },
+    { label: '✏️ Other (specify)',          action: () => askOtherExtract() },
+  ]);
+}
+
+async function handleExtractType(type) {
+  userMsg(type);
+  state.collected['Extract Type'] = type;
+  state.breadcrumbs = [...state.breadcrumbs.slice(0, -1), type];
+  updateBreadcrumb();
+  updateSidePanel();
+
+  if (type === 'Root Extract') {
+    await botMsg(`For <strong>Root Extract</strong>, we offer multiple grades measured by HPLC and Gravimetry. Please select your desired withanolide grade:`, 300);
+    addOptions([
+      { label: '1.5%',             action: () => handleRootGrade('1.5%') },
+      { label: '2.5%',             action: () => handleRootGrade('2.5%') },
+      { label: '5% (HPLC)',        action: () => handleRootGrade('5% HPLC') },
+      { label: '5% (Gravimetry)',  action: () => handleRootGrade('5% Gravimetry') },
+    ]);
+  } else if (type === 'Leaf Extract') {
+    state.collected['Withanolide Grade'] = '1.5–8%';
+    updateSidePanel();
+    await botMsg(`Our <strong>Leaf Extract</strong> is standardized to <span class="highlight-gold">1.5–8% withanolides</span>. This range offers excellent flexibility for formulation.<br><br>Moving on — what withanolide content specification do you require?`, 300);
+    askWithanolideContent();
+  } else if (type === 'Both Root & Leaf') {
+    state.collected['Withanolide Grade'] = 'NLT 5% w/w (HPLC)';
+    updateSidePanel();
+    await botMsg(`Our <strong>Root & Leaf combination</strong> extract is standardized to <span class="highlight-gold">Withanolides NLT 5% w/w by HPLC</span> — ideal for comprehensive full-spectrum formulations.<br><br>What withanolide content do you need?`, 300);
+    askWithanolideContent();
+  }
+}
+
+async function handleRootGrade(grade) {
+  userMsg(grade);
+  state.collected['Withanolide Grade'] = grade;
+  updateSidePanel();
+  await botMsg(`Noted — <strong>${grade}</strong> Root Extract selected. Now, what total withanolide content specification do you require in your formulation?`, 300);
+  askWithanolideContent();
+}
+
+async function askOtherExtract() {
+  await botMsg(`Please specify the type of Ashwagandha extract you're looking for:`, 300);
+  addTextInput('e.g., Full spectrum, Water-soluble, etc.', async (val) => {
+    userMsg(val);
+    state.collected['Extract Type'] = val;
+    updateSidePanel();
+    await botMsg(`Thank you — we've noted your requirement for <strong>"${val}"</strong> extract. Our team will explore the best option for you.<br><br>What withanolide content are you targeting?`, 300);
+    askWithanolideContent();
+  });
+}
+
+async function askWithanolideContent() {
+  state.breadcrumbs = [...state.breadcrumbs.slice(0, -1), 'Withanolide Content'];
+  updateBreadcrumb();
+
+  await botMsg(`What is the withanolide content of your Ashwagandha extract specification?`, 200);
+  addOptions([
+    { label: '2.5%',          action: () => handleWithanolide('2.5%') },
+    { label: '5–10%',         action: () => handleWithanolide('5–10%') },
+    { label: '10%',           action: () => handleWithanolide('10%') },
+    { label: '✏️ Other',      action: () => askOtherWithanolide() },
+  ]);
+}
+
+async function handleWithanolide(content) {
+  userMsg(content);
+  state.collected['Withanolide Content'] = content;
+  updateSidePanel();
+  await botMsg(`Perfect — <strong>${content}</strong> withanolide content confirmed.`, 200);
+  askMOQ();
+}
+
+async function askOtherWithanolide() {
+  await botMsg(`Please enter your required withanolide content:`, 200);
+  addTextInput('e.g., 7%, 15%, custom spec…', async (val) => {
+    userMsg(val);
+    state.collected['Withanolide Content'] = val;
+    updateSidePanel();
+    await botMsg(`Noted — <strong>${val}</strong> withanolide content requirement recorded.`, 200);
+    askMOQ();
+  });
+}
+
+async function askMOQ() {
+  state.breadcrumbs = [...state.breadcrumbs.slice(0, -1), 'MOQ'];
+  updateBreadcrumb();
+
+  await botMsg(`What is your <strong>Minimum Order Quantity (MOQ)</strong> for the Ashwagandha extract?`, 300);
+  addOptions([
+    { label: '📦 50 Kg',     action: () => handleMOQ('50 Kg') },
+    { label: '📦 100 Kg',    action: () => handleMOQ('100 Kg') },
+    { label: '📦 250+ Kg',   action: () => handleMOQ('250+ Kg') },
+  ]);
+}
+
+async function handleMOQ(moq) {
+  userMsg(moq);
+  state.collected['MOQ'] = moq;
+  updateSidePanel();
+
+  state.breadcrumbs = ['Welcome', 'Cognitive Health', 'AshwaMind', 'Summary'];
+  updateBreadcrumb();
+
+  await botMsg(`Thank you for your specifications! Here's a summary of your inquiry:<br><br>
+    <strong>Product:</strong> AshwaMind (Ashwagandha Extract)<br>
+    <strong>Extract Type:</strong> ${state.collected['Extract Type'] || '—'}<br>
+    <strong>Grade:</strong> ${state.collected['Withanolide Grade'] || '—'}<br>
+    <strong>Withanolide Content:</strong> ${state.collected['Withanolide Content']}<br>
+    <strong>MOQ:</strong> ${moq}<br><br>
+    Our <span class="highlight-gold">Business Development Team</span> will get in touch with you shortly! 🎉`, 300);
+
+  await askAnythingElse();
+}
+
+// ─────────────────────────────────────────
+// ANYTHING ELSE FLOW
+// ─────────────────────────────────────────
+
+async function askAnythingElse() {
+  state.breadcrumbs = [...state.breadcrumbs.slice(0, -1), 'More Help?'];
+  updateBreadcrumb();
+
+  await botMsg(`Is there anything else I can help you with?`, 400);
+  addOptions([
+    { label: '✅ Yes, I have more questions', style: 'gold-btn', action: () => showMoreOptions() },
+    { label: '👋 No, thank you',             style: '',          action: () => endConversation() },
+  ]);
+}
+
+async function showMoreOptions() {
+  userMsg('Yes, I have more questions');
+  await botMsg(`What would you like to know more about?`, 200);
+
+  addOptions([
+    { label: '📦 Minimum Packaging Size',       action: () => showPackagingInfo() },
+    { label: '🔬 Clinical Studies (Ashwagandha)', action: () => showClinicalInfo() },
+    { label: '🏷️ Ashwagandha Brand Info',        action: () => showBrandInfo() },
+    { label: '📜 Certifications',                action: () => showCertInfo() },
+    { label: '🧪 Free Samples',                  action: () => showSampleInfo() },
+    { label: '🚢 Shipping Details',              action: () => showShippingInfo() },
+    { label: '🌿 Explore Other Products',        action: () => { userMsg('Explore other products'); startWelcome(); } },
+  ]);
+}
+
+async function showPackagingInfo() {
+  userMsg('Minimum Packaging Size');
+  state.collected['Packaging Query'] = 'Asked';
+  updateSidePanel();
+  await botMsg(`We normally export in <strong>25 kg packages in HDPE drums</strong>. These are food-grade, moisture-resistant, and suitable for international transport. 📦`, 300);
+  addOptions([{ label: '⬅ More questions', style: 'outline-btn', action: () => showMoreOptions() },
+              { label: '✅ Done, thank you', action: () => endConversation() }]);
+}
+
+async function showClinicalInfo() {
+  userMsg('Clinical Studies (Ashwagandha)');
+  await botMsg(`We have extensive clinical study documentation for our Ashwagandha range. You can review the full clinical data at:<br><br>
+    <a class="link-tag" href="https://www.botanichealthcare.net/ashwamind/" target="_blank">🔗 botanichealthcare.net/ashwamind</a>`, 300);
+  addOptions([{ label: '⬅ More questions', style: 'outline-btn', action: () => showMoreOptions() },
+              { label: '✅ Done, thank you', action: () => endConversation() }]);
+}
+
+async function showBrandInfo() {
+  userMsg('Ashwagandha Brand Info');
+  await botMsg(`Learn about our <strong>AshwaMind</strong> branded Ashwagandha — positioning, claims, and brand story:<br><br>
+    <a class="link-tag" href="https://www.botanichealthcare.net/ashwamind/" target="_blank">🔗 botanichealthcare.net/ashwamind</a>`, 300);
+  addOptions([{ label: '⬅ More questions', style: 'outline-btn', action: () => showMoreOptions() },
+              { label: '✅ Done, thank you', action: () => endConversation() }]);
+}
+
+async function showCertInfo() {
+  userMsg('Certifications');
+  await botMsg(`Our certifications include <strong>GMP, ISO, Organic, Kosher, Halal</strong> and more. Browse all our quality certifications here:<br><br>
+    <a class="link-tag" href="https://www.botanichealthcare.net/certifications/" target="_blank">🔗 botanichealthcare.net/certifications</a>`, 300);
+  addOptions([{ label: '⬅ More questions', style: 'outline-btn', action: () => showMoreOptions() },
+              { label: '✅ Done, thank you', action: () => endConversation() }]);
+}
+
+async function showSampleInfo() {
+  userMsg('Free Samples');
+  await botMsg(`Great news — <strong>we provide free samples globally</strong>! 🌍<br><br>Once our Business Development team contacts you, they will arrange a complimentary sample shipment to your facility.`, 300);
+  addOptions([{ label: '⬅ More questions', style: 'outline-btn', action: () => showMoreOptions() },
+              { label: '✅ Done, thank you', action: () => endConversation() }]);
+}
+
+async function showShippingInfo() {
+  userMsg('Shipping Details');
+  await botMsg(`Here are our shipping details:`, 300);
+  await botMsg(`<strong>🕒 Processing Lead Time:</strong> <span class="highlight-gold">2–4 weeks</span><br><br>
+    <strong>🌍 International Shipping:</strong> Yes, we ship globally<br><br>
+    <strong>📦 Packaging:</strong> 25 kg HDPE food-grade drums<br><br>
+    Would you like to know more about international shipping options?`, 200);
+
+  addOptions([
+    { label: '🌏 Yes, tell me about intl. shipping', style: 'gold-btn', action: () => showIntlShipping() },
+    { label: '⬅ More questions', style: 'outline-btn', action: () => showMoreOptions() },
+    { label: '✅ Done, thank you', action: () => endConversation() },
+  ]);
+}
+
+async function showIntlShipping() {
+  userMsg('Tell me about international shipping');
+  await botMsg(`We offer international shipping to all major markets including <strong>USA, Europe, UK, Australia, Japan, Middle East, Southeast Asia</strong> and more. 🌐<br><br>Our logistics team works with trusted freight partners to ensure safe, compliant delivery of all our botanical extracts with full documentation (COA, MSDS, Phytosanitary certificates).`, 300);
+  addOptions([{ label: '⬅ More questions', style: 'outline-btn', action: () => showMoreOptions() },
+              { label: '✅ Done, thank you', action: () => endConversation() }]);
+}
+
+async function endConversation() {
+  userMsg('No, thank you');
+  state.breadcrumbs = ['Completed'];
+  updateBreadcrumb();
+
+  await botMsg(`Thank you for reaching out to <strong>Botanica Healthcare</strong>! 🌿<br><br>Your inquiry has been recorded. Our Business Development Team will be in touch with you shortly.`, 300);
+  addEndCard('🙏 Thanks for Contacting Us', 'We look forward to partnering with you. Expect a response from our team within 24 hours. Have a wonderful day!');
+
+  // Show restart
+  setTimeout(() => {
+    const btn = document.createElement('div');
+    btn.style.cssText = 'padding-left:48px;margin-top:12px;';
+    btn.innerHTML = `<button class="opt-btn gold-btn" onclick="restartChat()">↺ Start a New Inquiry</button>`;
+    chat.appendChild(btn);
+    scrollBot();
+  }, 800);
+}
+
+// ─────────────────────────────────────────
+// FREE INPUT HANDLER
+// ─────────────────────────────────────────
+function handleFreeInput() {
+  const input = document.getElementById('mainInput');
+  const val = input.value.trim();
+  if (!val) return;
+  input.value = '';
+  userMsg(val);
+  handleFreeText(val);
+}
+
+function handleKeydown(e) {
+  if (e.key === 'Enter') handleFreeInput();
+}
+
+async function handleFreeText(text) {
+  const lower = text.toLowerCase();
+  if (lower.includes('ashwagandha') || lower.includes('ashwa') || lower.includes('ashwamind')) {
+    await botMsg(`I see you're interested in <strong>Ashwagandha / AshwaMind</strong>! Let me take you through our detailed product flow. 🌿`, 200);
+    state.collected['Product'] = 'AshwaMind';
+    state.collected['Category'] = 'Cognitive Health';
+    updateSidePanel();
+    await startAshwagandhaFlow();
+  } else if (lower.includes('sample')) {
+    await showSampleInfo();
+  } else if (lower.includes('ship')) {
+    await showShippingInfo();
+  } else if (lower.includes('certif')) {
+    await showCertInfo();
+  } else if (lower.includes('price') || lower.includes('cost') || lower.includes('pricing')) {
+    await botMsg(`Pricing is customized based on your specific grade, quantity, and order frequency. Our Business Development team will provide a detailed quotation once we understand your requirements fully. Would you like to complete a product inquiry?`, 300);
+    addOptions([
+      { label: '✅ Yes, proceed with inquiry', style: 'gold-btn', action: () => startWelcome() },
+      { label: '❌ No thanks', style: 'outline-btn', action: () => endConversation() },
+    ]);
+  } else {
+    await botMsg(`I received your message: <em>"${text}"</em><br><br>For specific inquiries, I'd recommend using the guided flow. Shall I take you back to the product menu?`, 300);
+    addOptions([
+      { label: '✅ Yes, show product menu', style: 'gold-btn', action: () => startWelcome() },
+      { label: '📞 Connect me with the team', action: () => endConversation() },
+    ]);
+  }
+}
+
+// ─────────────────────────────────────────
+// RESTART
+// ─────────────────────────────────────────
+function restartChat() {
+  chat.innerHTML = '';
+  state = { step: 'welcome', collected: {}, currentProduct: null, breadcrumbs: ['Welcome'] };
+  updateSidePanel();
+  updateBreadcrumb();
+  startWelcome();
+}
+
+// ─────────────────────────────────────────
+// SIDE PANEL PILLARS
+// ─────────────────────────────────────────
+function buildPillarGrid() {
+  const grid = document.getElementById('pillarGrid');
+  PILLARS.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'pillar-card';
+    card.innerHTML = `
+      <div class="pillar-icon">${p.icon}</div>
+      <div class="pillar-name">${p.name}</div>
+      <div class="pillar-count">${p.products.length} products</div>
+    `;
+    card.onclick = () => {
+      // Clear chat and jump to this pillar
+      chat.innerHTML = '';
+      state = { step: 'category', collected: { 'Category': p.name }, currentProduct: null, breadcrumbs: ['Welcome', p.name] };
+      updateBreadcrumb();
+      updateSidePanel();
+      botMsg(`You selected <strong>${p.icon} ${p.name}</strong>. Here are our products in this category:`, 0).then(() => showProductSelection(p));
+    };
+    grid.appendChild(card);
+  });
+}
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+buildPillarGrid();
+startWelcome();
+</script>
+</body>
+</html>
